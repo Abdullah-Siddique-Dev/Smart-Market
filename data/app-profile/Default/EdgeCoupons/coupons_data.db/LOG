@@ -1,0 +1,5 @@
+2026/09/24-21:12:44.570 46f8 Creating DB D:\Projects\Smart Market\data\app-profile\Default\EdgeCoupons/coupons_data.db since it was missing.
+2026/09/24-21:12:44.961 46f8 Reusing MANIFEST D:\Projects\Smart Market\data\app-profile\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/09/24-21:12:52.280 1cb0 Level-0 table #5: started
+2026/09/24-21:12:52.345 1cb0 Level-0 table #5: 683284 bytes OK
+2026/09/24-21:12:52.376 1cb0 Delete type=0 #3
