@@ -27,7 +27,8 @@ export async function seedDatabase(): Promise<void> {
   console.log('✅ [Database Seed] Seeding completed.');
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+const currentFile = fileURLToPath(import.meta.url);
+if (process.argv[1] && (process.argv[1].endsWith('seed.ts') || process.argv[1].endsWith('seed.js')) && process.argv[1] === currentFile) {
   seedDatabase()
     .then(() => process.exit(0))
     .catch((err) => {

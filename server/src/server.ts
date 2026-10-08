@@ -2,6 +2,7 @@ import { createApp } from './app.js';
 import { ENV } from './config/env.js';
 import { runMigrations } from './db/migrate.js';
 import { seedDatabase } from './db/seed.js';
+import { resolvedDbPath } from './db/connection.js';
 
 // Ignore EPIPE when running as a headless daemon without console
 process.on('uncaughtException', (err: any) => {
@@ -25,7 +26,7 @@ async function startServer(): Promise<void> {
       console.log('====================================================');
       console.log(`✅ Smart Market OS REST API running on http://localhost:${ENV.PORT}`);
       console.log(`📡 Environment: ${ENV.NODE_ENV}`);
-      console.log(`🔒 Database: SQLite in WAL mode (${ENV.DATABASE_PATH})`);
+      console.log(`🔒 Database: SQLite in WAL mode (${resolvedDbPath})`);
       console.log(`🌐 Allowed CORS: ${ENV.CLIENT_ORIGINS.join(', ')}`);
       console.log(`🩺 Health check: http://localhost:${ENV.PORT}/api/system/status`);
       console.log('====================================================');

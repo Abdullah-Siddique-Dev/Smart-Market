@@ -9,9 +9,14 @@ const __dirname = path.dirname(__filename);
 export function runMigrations(): void {
   const candidateSchemaPaths = [
     path.resolve(__dirname, 'schema.sql'),
+    path.resolve(__dirname, 'db/schema.sql'),
+    path.resolve(__dirname, '../db/schema.sql'),
     path.resolve(__dirname, '../../src/db/schema.sql'),
+    path.resolve(process.cwd(), 'server/dist/db/schema.sql'),
     path.resolve(process.cwd(), 'server/src/db/schema.sql'),
+    path.resolve(process.cwd(), 'dist/db/schema.sql'),
     path.resolve(process.cwd(), 'src/db/schema.sql'),
+    path.resolve(process.cwd(), 'resources/server/dist/db/schema.sql'),
   ];
   const schemaPath = candidateSchemaPaths.find((p) => fs.existsSync(p));
   if (!schemaPath) {
@@ -104,7 +109,8 @@ export function runMigrations(): void {
 }
 
 // Allow direct execution via CLI
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+const currentFile = fileURLToPath(import.meta.url);
+if (process.argv[1] && (process.argv[1].endsWith('migrate.ts') || process.argv[1].endsWith('migrate.js')) && process.argv[1] === currentFile) {
   runMigrations();
   process.exit(0);
 }

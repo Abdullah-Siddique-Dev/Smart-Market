@@ -24,7 +24,15 @@ export function createApp(): Express {
       origin: (origin, callback) => {
         // Allow requests with no origin (like mobile apps, curl, Tauri native IPC)
         if (!origin) return callback(null, true);
-        if (ENV.CLIENT_ORIGINS.includes(origin) || ENV.NODE_ENV === 'development') {
+        if (
+          ENV.NODE_ENV === 'development' ||
+          origin === 'null' ||
+          origin.startsWith('http://localhost') ||
+          origin.startsWith('http://127.0.0.1') ||
+          origin.startsWith('http://tauri.localhost') ||
+          origin.startsWith('tauri://') ||
+          ENV.CLIENT_ORIGINS.includes(origin)
+        ) {
           return callback(null, true);
         }
         return callback(new Error(`CORS blocked for origin: ${origin}`));

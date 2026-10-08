@@ -7,7 +7,7 @@
   "bin": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-assets.js",
     "build:exe": "tsc && pkg . --targets node18-win-x64 --output ../src-tauri/binaries/server-x86_64-pc-windows-msvc.exe",
     "start": "node dist/server.js",
     "test:smoke": "tsx test-smoke.ts",
