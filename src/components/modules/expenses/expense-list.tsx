@@ -259,7 +259,7 @@ export const ExpenseList: React.FC = () => {
         title="Delete Expense"
         description={`Are you sure you want to delete this expense of Rs. ${expenseToDelete?.amount}? This action cannot be undone.`}
         onConfirm={handleDelete}
-        confirmText="Delete"
+        confirmLabel="Delete"
         variant="destructive"
       />
     </div>

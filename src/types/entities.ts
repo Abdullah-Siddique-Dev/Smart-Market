@@ -283,11 +283,6 @@ export interface TwoFactorAuditLog {
 export interface LoginResponse {
   success: boolean;
   requiresTwoFactor?: boolean;
-  user?: {
-    id: number;
-    username: string;
-    role: UserRole;
-    full_name: string;
-  };
+  user?: User;
   message: string;
 }

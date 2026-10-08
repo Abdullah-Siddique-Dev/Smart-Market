@@ -1,9 +1,9 @@
 import { apiClient } from './client';
-import { User } from '@/types/entities';
+import { User, LoginResponse } from '@/types/entities';
 
 export const authApi = {
   login: async (credentials: { username: string; password: string }) => {
-    const res = await apiClient.post<{ success: boolean; user: User; message: string }>('/auth/login', credentials);
+    const res = await apiClient.post<LoginResponse>('/auth/login', credentials);
     return res.data;
   },
 

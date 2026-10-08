@@ -60,7 +60,7 @@ export const OrderList: React.FC = () => {
         },
       });
 
-      alert(`✓ Bill Created Successfully!\n\nOrder ${order.order_number} has been converted to bill ${result.data?.bill_number || ''}`);
+      alert(`✓ Bill Created Successfully!\n\nOrder ${order.order_number} has been converted to bill ${(result as any)?.bill_number || ''}`);
 
       // Navigate to billing page to show the created bill
       navigate('/billing');

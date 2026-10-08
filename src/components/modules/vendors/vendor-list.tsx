@@ -242,7 +242,7 @@ export const VendorList: React.FC = () => {
         title="Archive Vendor"
         description={`Archive "${toArchive?.name}"? They won't appear in dropdowns but data is preserved.`}
         onConfirm={async () => { if (toArchive) { await archiveVendor.mutateAsync(toArchive.id); setToArchive(null); } }}
-        confirmText="Archive"
+        confirmLabel="Archive"
         variant="destructive"
       />
     </div>

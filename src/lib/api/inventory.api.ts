@@ -53,6 +53,7 @@ export const inventoryApi = {
     product_id: number;
     quantity: number;
     unit_cost: number;
+    vendor_id?: number;
     supplier_info?: string;
     import_date?: string;
     update_master_cost?: boolean;
