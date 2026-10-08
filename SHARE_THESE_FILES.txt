@@ -1,0 +1,113 @@
+========================================
+  HOW TO SHARE SMART MARKET OS
+========================================
+
+PROBLEM:
+The .exe file alone won't work because it needs the backend server!
+
+SOLUTION:
+Share these files/folders with the other computer:
+
+========================================
+  FILES TO COPY:
+========================================
+
+1. smartmarket.exe
+   Location: D:\Projects\Smart Market\src-tauri\target\release\smartmarket.exe
+   Size: 4.2 MB
+
+2. START-SMARTMARKET.bat
+   Location: D:\Projects\Smart Market\START-SMARTMARKET.bat
+   Size: 2 KB
+
+3. server folder (COMPLETE)
+   Location: D:\Projects\Smart Market\server\
+   Size: ~200 MB
+   Important: Copy the ENTIRE folder with all subfolders!
+
+========================================
+  ON THE OTHER COMPUTER:
+========================================
+
+STEP 1: Install Node.js
+- Download from: https://nodejs.org/en/download/
+- Choose "LTS" version (recommended)
+- Install with default settings
+- Restart computer
+
+STEP 2: Copy Files
+- Create folder: C:\SmartMarket\
+- Copy all 3 items above into it
+- Structure should look like:
+  C:\SmartMarket\
+  ├── smartmarket.exe
+  ├── START-SMARTMARKET.bat
+  └── server\
+      ├── dist\
+      ├── node_modules\
+      ├── src\
+      └── package.json
+
+STEP 3: Run the App
+- Double-click: START-SMARTMARKET.bat
+- Wait 5 seconds for server to start
+- App will open automatically
+- Login: admin / admin123
+
+========================================
+  ALTERNATIVE (If Batch File Fails):
+========================================
+
+MANUAL START:
+
+Terminal 1 (Start Server):
+  cd C:\SmartMarket\server
+  node dist\server.js
+
+Terminal 2 (Start App):
+  cd C:\SmartMarket
+  .\smartmarket.exe
+
+Or just double-click smartmarket.exe after server is running.
+
+========================================
+  REQUIREMENTS:
+========================================
+
+✅ Windows 7/8/10/11 (64-bit)
+✅ Node.js 18.x or higher
+✅ ~250 MB free disk space
+✅ Port 4000 must be available
+
+========================================
+  TROUBLESHOOTING:
+========================================
+
+Error: "Failed to login"
+→ Server is not running. Check if port 4000 is being used.
+
+Error: "Node.js not found"
+→ Install Node.js and restart computer.
+
+Error: "Cannot find module"
+→ node_modules folder is missing. Copy entire server folder.
+
+========================================
+  EASIER SOLUTION:
+========================================
+
+If this is too complicated, I can create:
+
+1. Single installer file (.msi)
+   - Includes Node.js portable
+   - Includes all files
+   - One-click installation
+
+2. Complete portable package
+   - No installation needed
+   - Extract and run
+   - ~300 MB download
+
+Would you like me to create one of these?
+
+========================================

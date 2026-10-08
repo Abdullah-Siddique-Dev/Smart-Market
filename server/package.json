@@ -4,13 +4,24 @@
   "description": "Smart Market OS - Private Wholesale Distribution REST API",
   "type": "module",
   "main": "dist/server.js",
+  "bin": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "build:exe": "tsc && pkg . --targets node18-win-x64 --output ../src-tauri/binaries/server-x86_64-pc-windows-msvc.exe",
     "start": "node dist/server.js",
     "test:smoke": "tsx test-smoke.ts",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts"
+  },
+  "pkg": {
+    "assets": [
+      "dist/**/*"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "../src-tauri/binaries"
   },
   "keywords": [
     "wholesale",
