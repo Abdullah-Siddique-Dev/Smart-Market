@@ -6,9 +6,13 @@ const getBaseUrl = () => {
   }
   if (
     typeof window !== 'undefined' &&
-    (window.location.protocol === 'tauri:' ||
+    ((window as any).__TAURI_INTERNALS__ ||
+      (window as any).__TAURI__ ||
+      window.location.protocol === 'tauri:' ||
+      window.location.protocol === 'asset:' ||
       window.location.hostname === 'tauri.localhost' ||
-      window.location.origin.includes('tauri'))
+      window.location.origin.includes('tauri') ||
+      window.location.port !== '1420')
   ) {
     return 'http://127.0.0.1:4000/api';
   }
@@ -23,13 +27,25 @@ export const apiClient = axios.create({
   },
 });
 
+// Automatically inject desktop session token on all outgoing requests
+apiClient.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      config.headers['X-Auth-Token'] = token;
+    }
+  }
+  return config;
+});
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // If 401 Unauthorized and not on login page, redirect or broadcast
+    // If 401 Unauthorized and not on login page, clear token
     if (error.response && error.response.status === 401) {
-      if (window.location.pathname !== '/login') {
-        // Session expired or logged out
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        localStorage.removeItem('auth_token');
       }
     }
     return Promise.reject(error);

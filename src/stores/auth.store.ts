@@ -25,9 +25,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (res.success && res.user) {
         set({ user: res.user, isAuthenticated: true, isLoading: false });
       } else {
+        if (typeof window !== 'undefined') localStorage.removeItem('auth_token');
         set({ user: null, isAuthenticated: false, isLoading: false });
       }
     } catch {
+      if (typeof window !== 'undefined') localStorage.removeItem('auth_token');
       set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },
@@ -36,6 +38,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await authApi.logout();
     } finally {
+      if (typeof window !== 'undefined') localStorage.removeItem('auth_token');
       set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },

@@ -104,7 +104,16 @@ export class ProductService {
         min_stock_alert
       );
 
-    return this.getProductById(Number(result.lastInsertRowid), true) as ProductRecord;
+    const newId = Number(result.lastInsertRowid);
+
+    if (current_stock > 0) {
+      db.prepare(`
+        INSERT INTO inventory_ledger (product_id, change_qty, balance_after, transaction_type, reference_id, reference_type, performed_by, notes)
+        VALUES (?, ?, ?, 'IMPORT', ?, 'INITIAL_STOCK', 1, 'Initial opening stock')
+      `).run(newId, current_stock, current_stock, newId);
+    }
+
+    return this.getProductById(newId, true) as ProductRecord;
   }
 
   static updateProduct(

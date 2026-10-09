@@ -72,9 +72,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         }
     }
 
-    // 3. Check if Tauri native executable exists in release target
+    // 3. Check if Tauri native desktop executable exists
     char tauriExe[MAX_PATH];
-    snprintf(tauriExe, sizeof(tauriExe), "%s\\src-tauri\\target\\release\\smartmarket.exe", exePath);
+    snprintf(tauriExe, sizeof(tauriExe), "%s\\smartmarket.exe", exePath);
+    if (GetFileAttributesA(tauriExe) == INVALID_FILE_ATTRIBUTES) {
+        snprintf(tauriExe, sizeof(tauriExe), "%s\\src-tauri\\target\\release\\smartmarket.exe", exePath);
+    }
 
     DWORD attribs = GetFileAttributesA(tauriExe);
     if (attribs != INVALID_FILE_ATTRIBUTES && !(attribs & FILE_ATTRIBUTE_DIRECTORY)) {

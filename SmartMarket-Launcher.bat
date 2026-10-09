@@ -10,23 +10,32 @@ echo.
 REM Get current directory
 set APP_DIR=%~dp0
 
-REM Check if Node.js is installed
+REM Check if Node.js is installed or bundled
+set "NODE_CMD=node"
 where node >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] Node.js is not installed!
-    echo.
-    echo Please install Node.js from: https://nodejs.org
-    echo Or use the portable version provided.
-    echo.
-    pause
-    exit /b 1
+    if exist "%APP_DIR%resources\bin\node.exe" (
+        set "NODE_CMD=%APP_DIR%resources\bin\node.exe"
+        echo [OK] Using bundled Node.js runtime!
+    ) else if exist "%APP_DIR%bin\node.exe" (
+        set "NODE_CMD=%APP_DIR%bin\node.exe"
+        echo [OK] Using bundled Node.js runtime!
+    ) else (
+        echo [ERROR] Node.js is not installed!
+        echo.
+        echo Please install Node.js from: https://nodejs.org
+        echo Or ensure resources/bin/node.exe is present.
+        echo.
+        pause
+        exit /b 1
+    )
 )
 
 REM Start backend server
 echo [1/2] Starting backend server...
 echo      Port: 4000
 cd /d "%APP_DIR%server"
-start /B "SmartMarket-Server" node dist\server.js
+start /B "SmartMarket-Server" %NODE_CMD% dist\server.js
 
 REM Wait for server to initialize
 echo      Waiting for server initialization...

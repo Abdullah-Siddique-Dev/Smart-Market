@@ -43,6 +43,17 @@ CREATE INDEX IF NOT EXISTS idx_2fa_audit_user ON two_fa_audit(user_id);
 CREATE INDEX IF NOT EXISTS idx_2fa_audit_event ON two_fa_audit(event_type);
 CREATE INDEX IF NOT EXISTS idx_2fa_audit_date ON two_fa_audit(created_at);
 
+-- 1c. Desktop Session Tokens (Robust local desktop auth, immune to WebView cookie restrictions)
+CREATE TABLE IF NOT EXISTS auth_tokens (
+  token TEXT PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES system_users(id) ON DELETE CASCADE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+  expires_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_auth_tokens_token ON auth_tokens(token);
+CREATE INDEX IF NOT EXISTS idx_auth_tokens_user ON auth_tokens(user_id);
+
 -- 2. Products Master Catalog
 CREATE TABLE IF NOT EXISTS products (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { db } from '../db/connection.js';
 import { hashPassword, comparePassword } from '../utils/password.js';
 import { AppError } from '../middleware/error.middleware.js';
@@ -148,5 +149,43 @@ export class AuthService {
       ...user,
       two_fa_enabled: user.two_fa_enabled === 1,
     };
+  }
+
+  static createToken(userId: number): string {
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    try {
+      db.prepare(`
+        INSERT INTO auth_tokens (token, user_id, expires_at)
+        VALUES (?, ?, ?)
+      `).run(token, userId, expiresAt);
+    } catch (err) {
+      console.error('Failed to create auth token in DB:', err);
+    }
+    return token;
+  }
+
+  static getUserByToken(token: string): AuthenticatedUser | null {
+    if (!token || typeof token !== 'string') return null;
+    try {
+      const record = db.prepare(`
+        SELECT u.id, u.username, u.full_name, u.role, u.is_active
+        FROM auth_tokens t
+        JOIN system_users u ON t.user_id = u.id
+        WHERE t.token = ? AND t.expires_at > datetime('now', 'localtime') AND u.is_active = 1
+        LIMIT 1
+      `).get(token) as AuthenticatedUser | undefined;
+
+      return record || null;
+    } catch {
+      return null;
+    }
+  }
+
+  static revokeToken(token: string): void {
+    if (!token) return;
+    try {
+      db.prepare('DELETE FROM auth_tokens WHERE token = ?').run(token);
+    } catch {}
   }
 }

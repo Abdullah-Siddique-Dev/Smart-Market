@@ -21,6 +21,8 @@ fn find_node_executable(exe_dir: &Path, resource_dir: &Path) -> Option<PathBuf> 
     let candidates = [
         exe_dir.join("node.exe"),
         exe_dir.join("bin").join("node.exe"),
+        exe_dir.join("resources").join("bin").join("node.exe"),
+        exe_dir.join("resources").join("node.exe"),
         resource_dir.join("node.exe"),
         resource_dir.join("bin").join("node.exe"),
         resource_dir.join("resources").join("bin").join("node.exe"),
@@ -53,15 +55,17 @@ fn find_node_executable(exe_dir: &Path, resource_dir: &Path) -> Option<PathBuf> 
 fn find_server_entry(exe_dir: &Path, resource_dir: &Path) -> Option<(PathBuf, PathBuf)> {
     let cwd = std::env::current_dir().unwrap_or_default();
     let candidates = [
+        // Exe directory
+        (exe_dir.join("resources").join("server").join("dist").join("server.js"), exe_dir.join("resources").join("server")),
+        (exe_dir.join("server").join("dist").join("server.js"), exe_dir.join("server")),
+        (exe_dir.join("dist").join("server.js"), exe_dir.to_path_buf()),
         // Resources directory
+        (resource_dir.join("resources").join("server").join("dist").join("server.js"), resource_dir.join("resources").join("server")),
         (resource_dir.join("server").join("dist").join("server.js"), resource_dir.join("server")),
         (resource_dir.join("dist").join("server.js"), resource_dir.to_path_buf()),
-        (resource_dir.join("resources").join("server").join("dist").join("server.js"), resource_dir.join("resources").join("server")),
-        // Exe directory
-        (exe_dir.join("server").join("dist").join("server.js"), exe_dir.join("server")),
-        (exe_dir.join("resources").join("server").join("dist").join("server.js"), exe_dir.join("resources").join("server")),
         // Cwd directory
         (cwd.join("server").join("dist").join("server.js"), cwd.join("server")),
+        (cwd.join("resources").join("server").join("dist").join("server.js"), cwd.join("resources").join("server")),
         (cwd.join("dist").join("server.js"), cwd),
     ];
 
@@ -102,6 +106,13 @@ fn main() {
                             .current_dir(&working_dir)
                             .env("PORT", "4000");
 
+                        // Ensure database directory exists and set deterministic path
+                        let local_data = exe_dir.join("data");
+                        if let Ok(_) = std::fs::create_dir_all(&local_data) {
+                            let db_path = local_data.join("smart_market.sqlite");
+                            cmd.env("DATABASE_PATH", db_path.to_string_lossy().to_string());
+                        }
+
                         #[cfg(target_os = "windows")]
                         {
                             use std::os::windows::process::CommandExt;
@@ -114,8 +125,8 @@ fn main() {
                                 println!("✅ Server spawned with PID: {}", child.id());
                                 server_child = Some(child);
 
-                                // Wait up to 6 seconds for port 4000
-                                for _ in 0..60 {
+                                // Wait up to 12 seconds for port 4000 (covers initial migration on slower PCs)
+                                for _ in 0..120 {
                                     if is_port_listening(4000) {
                                         println!("✅ Backend listening on port 4000");
                                         break;

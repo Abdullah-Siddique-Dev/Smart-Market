@@ -96,8 +96,41 @@ export function runMigrations(): void {
       console.log('✅ [Database] Migrated bills table: order_booker_id is now nullable.');
     }
 
-    // Upgrade all existing system users to OWNER role
-    db.exec("UPDATE system_users SET role = 'OWNER' WHERE role != 'OWNER';");
+    // Ensure product_imports has vendor_id column
+    const importCols = db.pragma('table_info(product_imports)') as Array<{ name: string }>;
+    if (importCols.length > 0 && !importCols.some((col) => col.name === 'vendor_id')) {
+      db.exec(`ALTER TABLE product_imports ADD COLUMN vendor_id INTEGER REFERENCES vendors(id)`);
+      console.log('✅ [Database] Added vendor_id column to product_imports table.');
+    }
+
+    // Ensure system_users has 2FA columns and OWNER role
+    const userCols = db.pragma('table_info(system_users)') as Array<{ name: string }>;
+    if (userCols.length > 0) {
+      if (!userCols.some((col) => col.name === 'two_fa_enabled')) {
+        db.exec(`ALTER TABLE system_users ADD COLUMN two_fa_enabled INTEGER NOT NULL DEFAULT 0 CHECK (two_fa_enabled IN (0, 1))`);
+      }
+      if (!userCols.some((col) => col.name === 'two_fa_secret')) {
+        db.exec(`ALTER TABLE system_users ADD COLUMN two_fa_secret TEXT`);
+      }
+      db.exec("UPDATE system_users SET role = 'OWNER' WHERE role != 'OWNER';");
+    }
+
+    // Backfill opening ledger entries for any products with stock but no ledger records
+    const unreconciled = db.prepare(`
+      SELECT p.id, p.current_stock, (p.current_stock - COALESCE(SUM(il.change_qty), 0)) as variance
+      FROM products p
+      LEFT JOIN inventory_ledger il ON p.id = il.product_id
+      GROUP BY p.id
+      HAVING variance > 0
+    `).all() as Array<{ id: number; current_stock: number; variance: number }>;
+
+    for (const item of unreconciled) {
+      db.prepare(`
+        INSERT INTO inventory_ledger (product_id, change_qty, balance_after, transaction_type, reference_id, reference_type, performed_by, notes)
+        VALUES (?, ?, ?, 'IMPORT', ?, 'INITIAL_STOCK', 1, 'Opening stock reconciliation backfill')
+      `).run(item.id, item.variance, item.current_stock, item.id);
+      console.log(`✅ [Database] Reconciled initial stock for product ID ${item.id} (${item.variance} units).`);
+    }
   } catch (err) {
     console.warn('Migration check warning:', err);
   }

@@ -20,6 +20,10 @@ echo.
 echo [2/7] Copying executable...
 if exist "%SOURCE_DIR%src-tauri\target\release\smartmarket.exe" (
     copy "%SOURCE_DIR%src-tauri\target\release\smartmarket.exe" "%PKG_DIR%\" >nul
+    copy "%SOURCE_DIR%src-tauri\target\release\smartmarket.exe" "%PKG_DIR%\Smart Market OS.exe" >nul
+    if exist "%SOURCE_DIR%src-tauri\target\release\bundle\nsis\Smart Market OS_1.0.0_x64-setup.exe" (
+        copy "%SOURCE_DIR%src-tauri\target\release\bundle\nsis\Smart Market OS_1.0.0_x64-setup.exe" "%SOURCE_DIR%" >nul
+    )
     echo      [OK] Executable copied
 ) else (
     echo      [ERROR] smartmarket.exe not found! Build the app first.
@@ -34,6 +38,14 @@ xcopy "%SOURCE_DIR%server\dist" "%PKG_DIR%\server\dist\" /E /I /Q >nul
 xcopy "%SOURCE_DIR%server\node_modules" "%PKG_DIR%\server\node_modules\" /E /I /Q >nul
 copy "%SOURCE_DIR%server\package.json" "%PKG_DIR%\server\" >nul
 echo      [OK] Server files copied
+
+echo.
+echo [3b/7] Bundling Node.js runtime...
+mkdir "%PKG_DIR%\resources\bin"
+if exist "%SOURCE_DIR%src-tauri\resources\bin\node.exe" (
+    copy "%SOURCE_DIR%src-tauri\resources\bin\node.exe" "%PKG_DIR%\resources\bin\" >nul
+    echo      [OK] Bundled Node.js runtime copied
+)
 
 echo.
 echo [4/7] Creating data directory...

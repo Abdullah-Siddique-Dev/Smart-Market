@@ -12,29 +12,38 @@ echo.
 
 REM Check Node.js installation
 echo [Step 1/3] Checking Node.js installation...
+set "NODE_CMD=node"
 where node >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
-    color 0C
-    echo.
-    echo [ERROR] Node.js is NOT installed!
-    echo.
-    echo Please download and install Node.js from:
-    echo https://nodejs.org/en/download/
-    echo.
-    echo After installation, restart this script.
-    echo.
-    pause
-    exit /b 1
+    if exist "%~dp0resources\bin\node.exe" (
+        set "NODE_CMD=%~dp0resources\bin\node.exe"
+        echo [OK] Using bundled Node.js runtime!
+    ) else if exist "%~dp0bin\node.exe" (
+        set "NODE_CMD=%~dp0bin\node.exe"
+        echo [OK] Using bundled Node.js runtime!
+    ) else (
+        color 0C
+        echo.
+        echo [ERROR] Node.js is NOT installed!
+        echo.
+        echo Please download and install Node.js from:
+        echo https://nodejs.org/en/download/
+        echo.
+        echo After installation, restart this script.
+        echo.
+        pause
+        exit /b 1
+    )
+) else (
+    node --version
+    echo [OK] Node.js is installed!
 )
-
-node --version
-echo [OK] Node.js is installed!
 echo.
 
 REM Start Backend Server
 echo [Step 2/3] Starting backend server...
 cd /d "%~dp0server"
-start /B /MIN node dist\server.js
+start /B /MIN "" %NODE_CMD% dist\server.js
 cd /d "%~dp0"
 
 REM Wait for server to initialize

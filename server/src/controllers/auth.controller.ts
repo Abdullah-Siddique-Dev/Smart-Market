@@ -30,11 +30,13 @@ export class AuthController {
 
       // No 2FA required, log user in directly
       if (result.user) {
+        const token = AuthService.createToken(result.user.id);
         req.login(result.user, (loginErr) => {
           if (loginErr) return next(loginErr);
           res.json({
             success: true,
             requiresTwoFactor: false,
+            token,
             user: {
               id: result.user!.id,
               username: result.user!.username,
@@ -72,11 +74,14 @@ export class AuthController {
       delete req.session.tempUserId;
       delete req.session.tempUsername;
 
+      const token = AuthService.createToken(user.id);
+
       // Log user in
       req.login(user, (loginErr) => {
         if (loginErr) return next(loginErr);
         res.json({
           success: true,
+          token,
           user: {
             id: user.id,
             username: user.username,
@@ -92,24 +97,48 @@ export class AuthController {
   }
 
   static logout(req: Request, res: Response, next: NextFunction): void {
+    const authHeader = req.headers.authorization || (req.headers['x-auth-token'] as string);
+    if (authHeader) {
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : authHeader.trim();
+      if (token) {
+        AuthService.revokeToken(token);
+      }
+    }
+
     req.logout((err) => {
       if (err) return next(err);
-      req.session.destroy(() => {
+      if (req.session) {
+        req.session.destroy(() => {
+          res.clearCookie('connect.sid');
+          res.json(successResponse(null, 'Logged out successfully'));
+        });
+      } else {
         res.clearCookie('connect.sid');
         res.json(successResponse(null, 'Logged out successfully'));
-      });
+      }
     });
   }
 
   static getSession(req: Request, res: Response): void {
-    if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+    let user = req.isAuthenticated && req.isAuthenticated() ? req.user : undefined;
+    if (!user) {
+      const authHeader = req.headers.authorization || (req.headers['x-auth-token'] as string);
+      if (authHeader) {
+        const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : authHeader.trim();
+        if (token) {
+          user = AuthService.getUserByToken(token) || undefined;
+        }
+      }
+    }
+
+    if (user) {
       res.json({
         success: true,
         user: {
-          id: req.user.id,
-          username: req.user.username,
-          role: req.user.role,
-          full_name: req.user.full_name,
+          id: user.id,
+          username: user.username,
+          role: user.role,
+          full_name: user.full_name,
         },
       });
       return;
